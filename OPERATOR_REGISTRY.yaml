@@ -1,0 +1,133 @@
+schema_version: 1
+target_arch_default: dav-2201
+operators:
+  elementwise_add:
+    spec: specs/01_elementwise_add.yaml
+    status_file: .npu-harness/operators/elementwise_add/STATUS.md
+    category: elementwise
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 10
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  axpy_scalar_affine:
+    spec: specs/02_axpy_scalar_affine.yaml
+    status_file: .npu-harness/operators/axpy_scalar_affine/STATUS.md
+    category: elementwise
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 19
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  broadcast_binary:
+    spec: specs/03_broadcast_binary.yaml
+    status_file: .npu-harness/operators/broadcast_binary/STATUS.md
+    category: elementwise
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 12
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  activation_gelu_silu:
+    spec: specs/04_activation_gelu_silu.yaml
+    status_file: .npu-harness/operators/activation_gelu_silu/STATUS.md
+    category: elementwise
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 8
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  reduce_sum_lastdim:
+    spec: specs/05_reduce_sum_lastdim.yaml
+    status_file: .npu-harness/operators/reduce_sum_lastdim/STATUS.md
+    category: reduction
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 24
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  transpose_2d_4d:
+    spec: specs/06_transpose_2d_4d.yaml
+    status_file: .npu-harness/operators/transpose_2d_4d/STATUS.md
+    category: layout
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 21
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  layer_norm:
+    spec: specs/07_layer_norm.yaml
+    status_file: .npu-harness/operators/layer_norm/STATUS.md
+    category: normalization
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 15
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  matmul_bias:
+    spec: specs/08_matmul_bias.yaml
+    status_file: .npu-harness/operators/matmul_bias/STATUS.md
+    category: matmul
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 18
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization with Cube Core MatMul"
+    accuracy: pass
+    performance: required
+  rms_norm_rope_fused:
+    spec: specs/09_rms_norm_rope_fused.yaml
+    status_file: .npu-harness/operators/rms_norm_rope_fused/STATUS.md
+    category: fusion
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 6
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization"
+    accuracy: pass
+    performance: sanity
+  flash_attention_fwd_fused:
+    spec: specs/10_flash_attention_fwd_fused.yaml
+    status_file: .npu-harness/operators/flash_attention_fwd_fused/STATUS.md
+    category: attention
+    generated: true
+    built_host: true
+    tested_host: true
+    host_tests_passed: 17
+    built_npu: false
+    tested_npu: skipped
+    npu_skip_reason: "NPU kernel needs AscendC vectorization with Cube Core MatMul + online softmax"
+    accuracy: pass
+    performance: required

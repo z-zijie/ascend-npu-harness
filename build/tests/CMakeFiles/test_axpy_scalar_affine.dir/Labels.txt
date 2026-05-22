@@ -1,0 +1,6 @@
+# Target labels
+ host
+ golden
+ elementwise
+# Source files and their labels
+/home/developer/workspace/harness/tests/test_axpy_scalar_affine.cpp

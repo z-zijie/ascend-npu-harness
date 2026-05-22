@@ -1,0 +1,18 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/developer/workspace/harness/tests/test_activation_gelu_silu.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"host",
+			"golden",
+			"elementwise"
+		],
+		"name" : "test_activation_gelu_silu"
+	}
+}

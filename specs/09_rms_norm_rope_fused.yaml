@@ -1,0 +1,194 @@
+schema_version: "1.0"
+
+name: rms_norm_rope_fused
+category: fusion
+target_arch: dav-2201
+
+summary: |
+  Fused RMSNorm + Rotary Position Embedding (RoPE) kernel.
+  First applies RMS Normalization over the last dimension, then applies
+  RoPE to the first rotary_dim dimensions of the hidden state.
+  This is a critical fusion pattern in modern LLM inference (e.g., LLaMA),
+  combining two operations into a single kernel to reduce memory bandwidth.
+
+math:
+  definition: |
+    RMSNorm (over hidden dimension H):
+      rms = sqrt(mean(x^2) + eps)
+      x_norm = x / rms * weight           for each token
+
+    RoPE (first rotary_dim dims, split into even/odd pairs):
+      For i in [0, rotary_dim/2 - 1]:
+        x_even = x_norm[..., 2i]
+        x_odd  = x_norm[..., 2i+1]
+        x_rot_even = x_even * cos[..., i] - x_odd * sin[..., i]
+        x_rot_odd  = x_odd * cos[..., i] + x_even * sin[..., i]
+      For i in [rotary_dim, H-1]:
+        y[..., i] = x_norm[..., i]          pass-through
+  equations:
+    - "rms = sqrt((1/H) * sum(x^2) + eps)"
+    - "x_norm = x / rms * weight"
+    - "RoPE: rotate adjacent pairs (2i, 2i+1) by cos[i], sin[i]"
+    - "Pass-through: rope_dim <= H, unmapped dims unchanged"
+  notes:
+    - "RMSNorm uses the root-mean-square rather than full variance"
+    - "RoPE applies only to the first rotary_dim dimensions"
+    - "rotary_dim must be even"
+    - "rotary_dim <= H (hidden size)"
+    - "cos and sin are precomputed tables of shape [S, rotary_dim/2]"
+    - "Fusion eliminates two intermediate tensor round-trips to memory"
+
+inputs:
+  - name: x
+    dtype: [float16]
+    shape: "[B, S, H]"
+    layout: contiguous
+    role: "input activations"
+
+  - name: weight
+    dtype: [float16]
+    shape: "[H]"
+    layout: contiguous
+    role: "RMSNorm learnable scale parameter"
+
+  - name: cos
+    dtype: [float16]
+    shape: "[S, rotary_dim / 2]"
+    layout: contiguous
+    role: "precomputed cosine values for RoPE"
+
+  - name: sin
+    dtype: [float16]
+    shape: "[S, rotary_dim / 2]"
+    layout: contiguous
+    role: "precomputed sine values for RoPE"
+
+outputs:
+  - name: y
+    dtype: [float16]
+    shape: "[B, S, H]"
+    layout: contiguous
+
+parameters:
+  - name: eps
+    type: float
+    default: 1.0e-6
+    description: "Small constant for numerical stability in RMSNorm"
+
+  - name: rotary_dim
+    type: int
+    description: "Number of dimensions to apply RoPE to (must be even, <= H)"
+
+  - name: base
+    type: float
+    default: 10000.0
+    description: "Base frequency for RoPE (used in precomputing cos/sin)"
+
+shape_symbols:
+  B:
+    description: "Batch size"
+    values: [1, 2, 4]
+  S:
+    description: "Sequence length"
+    values: [1, 16, 128, 1024]
+  H:
+    description: "Hidden dimension"
+    values: [64, 128, 768, 4096]
+  rotary_dim:
+    description: "Number of dimensions to apply RoPE"
+    values: [32, 64, 128]
+
+shape_rules:
+  - "x.shape == [B, S, H]"
+  - "weight.shape == [H]"
+  - "cos.shape == [S, rotary_dim / 2]"
+  - "sin.shape == [S, rotary_dim / 2]"
+  - "y.shape == [B, S, H]"
+  - "rotary_dim <= H"
+  - "rotary_dim % 2 == 0"
+  - "B >= 1, S >= 1, H >= 1"
+
+dtype_rules:
+  - "All tensors: float16 only"
+  - "RMS accumulation uses float32 intermediate for precision"
+  - "Final output y is cast back to float16"
+
+layout_rules:
+  - "All tensors must be contiguous in memory"
+  - "Input x and output y are [B, S, H] contiguous"
+  - "cos and sin are [S, rotary_dim/2] contiguous"
+
+broadcasting:
+  supported: true
+  rules:
+    - "weight [H] broadcasts over B and S dimensions"
+    - "cos [S, rotary_dim/2] broadcasts over B dimension"
+    - "sin [S, rotary_dim/2] broadcasts over B dimension"
+
+masking: false
+
+tiling:
+  description: |
+    Tile over B and S dimensions. Each AI Core processes one or more tokens
+    (B*S slices). For each token, the kernel:
+    1. Computes rms over H (reduce + sqrt + reciprocal)
+    2. Applies RMSNorm: normalize + scale by weight
+    3. Applies RoPE to first rotary_dim dims pair-wise
+    4. Passes through remaining H - rotary_dim dims
+  tile_b: 1
+  tile_s: 1
+  strategy: "per-token processing with fused norm and rotary embedding"
+
+implementation:
+  language: AscendC
+  style: "fused per-token normalization and rotary embedding kernel"
+  strategy: |
+    Each AI Core is assigned a set of tokens (b, s).
+    For each assigned token:
+      1. Load x[b, s, :] (size H) into registers / UB
+      2. Compute rms = sqrt(mean(x^2) + eps) using a vectorized reduction
+      3. Compute inv_rms = 1.0 / rms
+      4. Normalize: x_norm = x * inv_rms * weight (elementwise)
+      5. Load cos[s, :] and sin[s, :] (size rotary_dim/2)
+      6. For each pair (2i, 2i+1) in rotary_dim/2:
+           Apply RoPE rotation using cos and sin
+      7. For remaining dims: pass through x_norm unchanged
+      8. Store y[b, s, :]
+    Double-buffer loads to overlap memory access with computation.
+
+accuracy:
+  float16:
+    abs: 5.0e-2
+    rel: 5.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    - {B: 1, S: 1, H: 64, rotary_dim: 32}
+    - {B: 1, S: 16, H: 128, rotary_dim: 64}
+    - {B: 2, S: 128, H: 768, rotary_dim: 64}
+    - {B: 4, S: 16, H: 4096, rotary_dim: 128}
+    - {B: 2, S: 1024, H: 768, rotary_dim: 128}
+  edge_cases:
+    - "rotary_dim == H          full RoPE, no pass-through"
+    - "rotary_dim == 2          minimal RoPE"
+    - "S=1                     single token"
+    - "H=64, rotary_dim=32     half RoPE coverage"
+  invalid_cases:
+    - "rotary_dim > H           exceeds hidden dimension"
+    - "rotary_dim odd           not an even number"
+    - "rotary_dim < 2           trivial (no rotation)"
+    - "eps <= 0                 non-positive epsilon"
+    - "cos/sin shape mismatch with S or rotary_dim"
+    - "dtype not float16"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

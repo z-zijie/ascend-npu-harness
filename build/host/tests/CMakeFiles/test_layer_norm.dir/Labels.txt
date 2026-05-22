@@ -1,0 +1,8 @@
+# Target labels
+ host
+ golden
+ normalization
+ reduction
+ elementwise
+# Source files and their labels
+/home/developer/workspace/harness/tests/test_layer_norm.cpp

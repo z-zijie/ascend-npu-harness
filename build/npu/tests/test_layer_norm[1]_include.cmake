@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/npu/tests/test_layer_norm[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/npu/tests/test_layer_norm[1]_tests.cmake")
+else()
+  add_test(test_layer_norm_NOT_BUILT test_layer_norm_NOT_BUILT)
+endif()

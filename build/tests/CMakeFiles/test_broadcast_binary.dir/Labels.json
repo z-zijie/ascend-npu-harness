@@ -1,0 +1,18 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/developer/workspace/harness/tests/test_broadcast_binary.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"host",
+			"golden",
+			"elementwise"
+		],
+		"name" : "test_broadcast_binary"
+	}
+}

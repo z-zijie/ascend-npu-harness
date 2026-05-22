@@ -1,0 +1,183 @@
+schema_version: "1.0"
+
+name: matmul_bias
+category: matmul
+target_arch: dav-2201
+
+summary: |
+  Matrix multiplication with optional bias addition: C = A @ B + bias.
+  A is [M, K], B is [K, N], bias (optional) is [N], C is [M, N].
+  Primary dtype is float16, with float32 supported as an optional secondary dtype.
+  This is a performance-critical kernel with explicit latency targets.
+
+math:
+  definition: |
+    For each (i, j) in [0..M-1] x [0..N-1]:
+      C[i, j] = sum_{k=0}^{K-1} A[i, k] * B[k, j]
+    If bias is present:
+      C[i, j] += bias[j]
+  equations:
+    - "C = A @ B + bias  (bias optional)"
+    - "C[i][j] = sum_k A[i][k] * B[k][j] + bias[j]"
+  notes:
+    - "GEMM (General Matrix Multiply) with optional bias fusion"
+    - "bias can be omitted (null) for plain matmul"
+    - "float16 accumulation may use float32 intermediate for precision"
+    - "K dimension is the inner/reduction dimension"
+
+inputs:
+  - name: A
+    dtype: [float16, float32]
+    shape: "[M, K]"
+    layout: "row-major contiguous"
+    role: "left operand matrix"
+
+  - name: B
+    dtype: [float16, float32]
+    shape: "[K, N]"
+    layout: "column-major preferred; row-major accepted"
+    role: "right operand matrix"
+
+  - name: bias
+    dtype: [float16, float32]
+    shape: "[N]"
+    layout: contiguous
+    role: "optional bias vector broadcast-added to each row of the result"
+    optional: true
+
+outputs:
+  - name: C
+    dtype: [float16, float32]
+    shape: "[M, N]"
+    layout: "row-major contiguous"
+
+parameters:
+  - name: transpose_a
+    type: bool
+    default: false
+    description: "If true, A is treated as [K, M] and transposed before the multiply"
+
+  - name: transpose_b
+    type: bool
+    default: false
+    description: "If true, B is treated as [N, K] and transposed before the multiply"
+
+shape_symbols:
+  M:
+    description: "Rows of A and C"
+    values: [1, 16, 64, 128, 256]
+  N:
+    description: "Columns of B and C"
+    values: [1, 16, 64, 128, 256]
+  K:
+    description: "Inner dimension / reduction dimension"
+    values: [1, 16, 64, 128, 256, 1024]
+
+shape_rules:
+  - "A.shape == [M, K] (if transpose_a=false)"
+  - "B.shape == [K, N] (if transpose_b=false)"
+  - "bias is None OR bias.shape == [N]"
+  - "C.shape == [M, N]"
+  - "M >= 1, N >= 1, K >= 1"
+
+dtype_rules:
+  - "dtype(A) == dtype(B)"
+  - "dtype(C) == dtype(A)"
+  - "dtype(bias) is None OR dtype(bias) == dtype(A)"
+  - "float16 is the primary and required dtype"
+  - "float32 is an optional secondary dtype"
+  - "Internal accumulation may use float32 intermediate for float16 inputs"
+
+layout_rules:
+  - "A and C are row-major contiguous"
+  - "B is preferably column-major for optimal cache/TLB usage on the NPU"
+  - "B in row-major is accepted but may reduce performance"
+
+broadcasting:
+  supported: true
+  rules:
+    - "bias [N] broadcasts over M rows: effectively reshape to [1, N] then broadcast to [M, N]"
+
+masking: false
+
+tiling:
+  description: |
+    Block-tiled GEMM. Tiles of A (M_block x K_block) and B (K_block x N_block)
+    are loaded into shared memory / L1. The outer product is accumulated in
+    registers. The output is tiled as M_block x N_block blocks.
+  tile_m: 16
+  tile_n: 16
+  tile_k: 16
+  strategy: "hierarchical tiling with double buffering in shared memory"
+
+implementation:
+  language: AscendC
+  style: "tiled GEMM kernel with bias fusion, vectorized inner loop"
+  strategy: |
+    - Tile A into blocks of [tile_m, tile_k]
+    - Tile B into blocks of [tile_k, tile_n]
+    - Each AI Core computes a [tile_m, tile_n] block of C
+    - Inner loop: load A_block and B_block into UB (shared memory),
+      compute outer product via vectorized fmac (fused multiply-accumulate)
+    - After the K loop, broadcast bias[j] across the tile_m rows
+    - Use double buffering to overlap loads with computation
+    - For float16, accumulate in float32 for precision, cast at the end
+
+accuracy:
+  float16:
+    abs: 1.0e-1
+    rel: 1.0e-1
+  float32:
+    abs: 1.0e-4
+    rel: 1.0e-4
+
+performance:
+  required: true
+  targets:
+    - name: "square GEMM"
+      shape: {M: 128, K: 128, N: 128}
+      dtype: float16
+      metric: latency_us
+      target: "<= 500"
+    - name: "tall skinny GEMM"
+      shape: {M: 256, K: 64, N: 1}
+      dtype: float16
+      metric: latency_us
+      target: "<= 100"
+  tuning_budget: "moderate"
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    - {M: 1, K: 1, N: 1}
+    - {M: 16, K: 16, N: 16}
+    - {M: 64, K: 128, N: 64}
+    - {M: 128, K: 128, N: 128}
+    - {M: 256, K: 256, N: 256}
+    - {M: 1, K: 1024, N: 64}
+    - {M: 64, K: 1024, N: 1}
+  special_cases:
+    - name: "skinny GEMM"
+      shape: {M: 1, K: 1024, N: 64}
+      description: "Tall and skinny: M=1, large K, moderate N"
+    - name: "square GEMM"
+      shape: {M: 128, K: 128, N: 128}
+      description: "Square matrix multiply, primary perf target"
+  edge_cases:
+    - "M=1               single output row"
+    - "N=1               single output column (GEMV)"
+    - "K=1               dot-product with a single inner dim"
+    - "M=256, N=256      largest square case"
+    - "bias=None         no bias fusion"
+  invalid_cases:
+    - "M=0 or N=0 or K=0   zero-dimension matrices"
+    - "shape mismatch: A[M,K] with B[K',N] where K != K'"
+    - "bias shape [M] instead of [N]"
+    - "dtype mismatch between A and B"
+
+benchmark:
+  required: true
+  warmup: 50
+  iterations: 200
+
+status: draft

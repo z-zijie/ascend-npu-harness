@@ -1,0 +1,116 @@
+schema_version: "1.0"
+
+name: elementwise_add
+category: elementwise
+target_arch: dav-2201
+
+summary: |
+  Elementwise addition of two tensors: z = x + y.
+  Operates on same-shape float32 or float16 inputs with contiguous layout.
+  Supports 1D through 4D tensor shapes.
+
+math:
+  definition: |
+    z[i] = x[i] + y[i]  for all indices i
+  equations:
+    - "z = x + y"
+  notes:
+    - "Elementwise operation with no broadcasting"
+    - "All inputs must have identical shape and dtype"
+
+inputs:
+  - name: x
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+    role: "first operand"
+
+  - name: y
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+    role: "second operand"
+
+outputs:
+  - name: z
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+
+parameters: []
+
+shape_symbols:
+  S:
+    description: "Generic shape tuple; all inputs and output share this shape"
+    examples:
+      - "[1]"
+      - "[8]"
+      - "[1024]"
+      - "[3, 7]"
+      - "[4, 16, 64]"
+      - "[2, 3, 32, 128]"
+
+shape_rules:
+  - "input_x.shape == input_y.shape"
+  - "output_z.shape == input_x.shape"
+  - 'rank($S) in [1, 2, 3, 4]'
+
+dtype_rules:
+  - "dtype(x) == dtype(y)"
+  - "dtype(z) == dtype(x)"
+  - "dtype(x) in {float32, float16}"
+
+layout_rules:
+  - "All tensors must be contiguous in memory"
+
+broadcasting: false
+
+masking: false
+
+tiling:
+  description: "1D tiling along the flattened element count"
+  tile_size: 1024
+
+implementation:
+  language: AscendC
+  style: "vectorized elementwise kernel"
+  strategy: |
+    Tile the flattened input along the element dimension.
+    Each AI Core processes one tile with vectorized loads, fadd, and vectorized stores.
+
+accuracy:
+  float32:
+    abs: 1.0e-5
+    rel: 1.0e-5
+  float16:
+    abs: 1.0e-2
+    rel: 1.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    - [1]
+    - [8]
+    - [1024]
+    - [3, 7]
+    - [4, 16, 64]
+    - [2, 3, 32, 128]
+  edge_cases:
+    - "[1]        single element"
+    - "[8]        small vector"
+    - "[2, 1]     unit dimension"
+    - "[1, 1, 1]  all-unit shape"
+  invalid_cases:
+    - "shape mismatch: x=[3,7], y=[7,3]"
+    - "dtype mismatch: x=float32, y=float16"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

@@ -1,0 +1,9 @@
+# Target labels
+ host
+ golden
+ llm
+ fusion
+ reduction
+ elementwise
+# Source files and their labels
+/home/developer/workspace/harness/tests/test_rms_norm_rope_fused.cpp

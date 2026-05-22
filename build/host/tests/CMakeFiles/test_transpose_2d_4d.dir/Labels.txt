@@ -1,0 +1,6 @@
+# Target labels
+ host
+ golden
+ layout
+# Source files and their labels
+/home/developer/workspace/harness/tests/test_transpose_2d_4d.cpp

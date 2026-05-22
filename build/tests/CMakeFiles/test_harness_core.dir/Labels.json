@@ -1,0 +1,17 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/developer/workspace/harness/tests/test_harness_core.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"host",
+			"golden"
+		],
+		"name" : "test_harness_core"
+	}
+}

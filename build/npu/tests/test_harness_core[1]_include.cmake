@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/npu/tests/test_harness_core[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/npu/tests/test_harness_core[1]_tests.cmake")
+else()
+  add_test(test_harness_core_NOT_BUILT test_harness_core_NOT_BUILT)
+endif()

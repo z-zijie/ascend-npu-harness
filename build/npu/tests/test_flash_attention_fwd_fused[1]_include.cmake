@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/npu/tests/test_flash_attention_fwd_fused[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/npu/tests/test_flash_attention_fwd_fused[1]_tests.cmake")
+else()
+  add_test(test_flash_attention_fwd_fused_NOT_BUILT test_flash_attention_fwd_fused_NOT_BUILT)
+endif()

@@ -1,0 +1,38 @@
+# .npu-harness/config.yaml
+harness_version: "0.1.0"
+default_arch: dav-2201
+project_name: npu-harness
+created: "2026-05-22"
+modes:
+  - host
+  - npu
+build:
+  host_dir: build/host
+  npu_dir: build/npu
+  generator: Ninja
+  cmake_minimum: "3.20"
+operator_workflow:
+  - intake
+  - spec
+  - discuss
+  - plan
+  - generate
+  - implement
+  - build
+  - test
+  - benchmark
+  - tune
+  - verify
+  - ship
+default_tolerances:
+  float32:
+    abs: 1.0e-5
+    rel: 1.0e-5
+  float16:
+    abs: 1.0e-2
+    rel: 1.0e-2
+test:
+  deterministic_seed: 20260522
+benchmark:
+  warmup_iterations: 10
+  measurement_iterations: 100

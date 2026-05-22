@@ -1,0 +1,67 @@
+op:
+  name: LayerNorm
+  category: Normalization
+  paradigms: [element-wise, reduce]
+
+  description: >
+    Applies Layer Normalization over a mini-batch of inputs.
+    Normalizes input across the last D dimensions.
+
+math_semantics:
+  formula: |
+    y = (x - mean(x, axis=-1, keepdims=True)) / sqrt(var(x, axis=-1, keepdims=True) + eps)
+    out = gamma * y + beta
+  reference_oracle: torch.nn.LayerNorm
+
+inputs:
+  - name: x
+    rank: [2, 3, 4, 5]
+    dtype_set: [float16, float32, bfloat16]
+  - name: gamma
+    rank: [1]
+    dtype_set: [float16, float32, bfloat16]
+    optional: true
+  - name: beta
+    rank: [1]
+    dtype_set: [float16, float32, bfloat16]
+    optional: true
+
+outputs:
+  - name: y
+    shape_rule: same_as_input_x
+
+attributes:
+  - name: normalized_shape
+    type: ListInt
+    description: "Shape of dimensions to normalize over"
+  - name: eps
+    type: float
+    default: 1e-5
+    description: "Epsilon for numerical stability"
+
+dtype_policy:
+  supported_combinations:
+    - [float16, float16]
+    - [float32, float32]
+    - [bfloat16, bfloat16]
+
+numerical_tolerance:
+  per_dtype:
+    float16: {rtol: 1e-3, atol: 1e-5}
+    float32: {rtol: 1e-5, atol: 1e-8}
+    bfloat16: {rtol: 1e-3, atol: 1e-5}
+
+boundary_conditions:
+  - "empty tensor (zero elements)"
+  - "normalized_shape = entire input shape"
+  - "single element along normalized dim"
+
+extreme_inputs:
+  - "very large values (1e8)"
+  - "very small values (1e-8)"
+  - "NaN/Inf inputs"
+
+determinism: true
+
+platform_constraints:
+  supported_chips: [Ascend910B, Ascend950DT, Ascend950PR]

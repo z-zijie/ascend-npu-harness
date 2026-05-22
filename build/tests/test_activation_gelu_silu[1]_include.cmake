@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/tests/test_activation_gelu_silu[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/tests/test_activation_gelu_silu[1]_tests.cmake")
+else()
+  add_test(test_activation_gelu_silu_NOT_BUILT test_activation_gelu_silu_NOT_BUILT)
+endif()

@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ops-Registry-Invoke Skills — Test Report</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --surface-alt: #f4f3f0;
+    --border: #e6e4e0;
+    --border-strong: #d4d1cc;
+    --text: #1a1a18;
+    --text-muted: #6b6b66;
+    --text-faint: #9b9b94;
+    --accent: #0066cc;
+    --accent-glow: #e6f0ff;
+    --pass: #1a7d3c;
+    --pass-bg: #edf7f0;
+    --fail: #c42b2b;
+    --fail-bg: #fdf2f2;
+    --warn: #b86e00;
+    --warn-bg: #fff8ed;
+    --info: #0066cc;
+    --info-bg: #edf4ff;
+    --radius: 6px;
+    --radius-sm: 3px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --font-mono: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(0,102,204,0.03) 0%, transparent 60%),
+      radial-gradient(circle at 85% 100%, rgba(0,102,204,0.02) 0%, transparent 50%);
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0066cc 0%, #0099ff 40%, #00cc88 70%, #0066cc 100%);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,102,204,0.15);
+    border-radius: 4px;
+    padding: 4px 10px;
+  }
+  .header-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  /* ---- STATS ROW ---- */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-card {
+    background: var(--surface);
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-family: var(--font-mono);
+  }
+  .stat-value.pass { color: var(--pass); }
+  .stat-value.warn { color: var(--warn); }
+  .stat-value.info { color: var(--accent); }
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  /* ---- MAIN ---- */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 48px;
+  }
+
+  /* ---- SECTION ---- */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-top: 1px;
+  }
+
+  /* ---- SKILL CARD ---- */
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .skill-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-strong);
+  }
+  .skill-card-header {
+    padding: 20px 24px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .skill-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .skill-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+  .skill-status.pass { color: var(--pass); background: var(--pass-bg); }
+  .skill-status.warn { color: var(--warn); background: var(--warn-bg); }
+  .skill-status.fail { color: var(--fail); background: var(--fail-bg); }
+  .skill-card-body {
+    padding: 16px 24px 20px;
+  }
+  .skill-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .skill-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .skill-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    letter-spacing: 0.02em;
+  }
+  .skill-tag.pass { color: var(--pass); border-color: rgba(26,125,60,0.2); background: var(--pass-bg); }
+  .skill-tag.warn { color: var(--warn); border-color: rgba(184,110,0,0.2); background: var(--warn-bg); }
+  .skill-tag.fail { color: var(--fail); border-color: rgba(196,43,43,0.15); background: var(--fail-bg); }
+
+  /* ---- DETAIL TABLE ---- */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .detail-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    background: var(--surface-alt);
+    border-bottom: 2px solid var(--border-strong);
+    white-space: nowrap;
+  }
+  .detail-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .detail-table tr:hover td { background: rgba(0,0,0,0.01); }
+  .detail-table .check-pass { color: var(--pass); font-weight: 700; }
+  .detail-table .check-warn { color: var(--warn); font-weight: 700; }
+  .detail-table .check-fail { color: var(--fail); font-weight: 700; }
+
+  /* ---- GOLDEN TEST ---- */
+  .golden-output {
+    background: #1a1a18;
+    color: #d4d4d0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.65;
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    max-height: 320px;
+    overflow-y: auto;
+    white-space: pre;
+    border: 1px solid #333;
+  }
+  .golden-output .g-pass { color: #4ec97a; }
+  .golden-output .g-fail { color: #e05555; }
+  .golden-output .g-dim { color: #808078; }
+
+  /* ---- ISSUES ---- */
+  .issue-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .issue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+  }
+  .issue-icon {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+  }
+  .issue-icon.warn { color: var(--warn); }
+  .issue-icon.info { color: var(--accent); }
+
+  /* ---- FLOW DIAGRAM ---- */
+  .flow-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    overflow-x: auto;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .flow-node {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 12px;
+    white-space: nowrap;
+    border: 1px solid;
+  }
+  .flow-node.resolver { background: #f0f4ff; border-color: #b8cff0; color: #264a8c; }
+  .flow-node.research { background: #edf7f0; border-color: #a8d8b8; color: #1a5c30; }
+  .flow-node.summary { background: #fff8ed; border-color: #f0c878; color: #8a5200; }
+  .flow-node.design { background: #fdf2f2; border-color: #f0a8a8; color: #8c2626; }
+  .flow-arrow {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    padding: 0 6px;
+    font-size: 14px;
+  }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 48px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  /* ---- COMMIT INFO ---- */
+  .commit-info {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .commit-hash {
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 900px) {
+    .skill-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .header, .main { padding-left: 24px; padding-right: 24px; }
+    .stat-value { font-size: 28px; }
+  }
+  @media (max-width: 500px) {
+    .stats-row { grid-template-columns: 1fr; }
+  }
+
+  /* ---- PRINT ---- */
+  @media print {
+    body { background: white; }
+    .header::before { background: #0066cc; -webkit-print-color-adjust: exact; }
+    .skill-card:hover { box-shadow: none; }
+  }
+
+  /* ---- TOGGLE ---- */
+  details { cursor: pointer; }
+  details summary {
+    list-style: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 4px 0;
+    user-select: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: '▸ '; display: inline-block; transition: transform 0.15s ease; font-size: 10px; }
+  details[open] summary::before { transform: rotate(90deg); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-top">
+    <span class="header-badge">Test Report</span>
+    <span style="font-size:12px;color:var(--text-muted)">2026-05-22</span>
+  </div>
+  <h1>Ops-Registry-Invoke Skills — 测试报告</h1>
+  <p class="subtitle">对最新提交 <code style="font-family:var(--font-mono);font-size:13px">93dbb64</code> 中 6 个 NPU 算子研究技能的全面验证</p>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-value pass">6 / 6</div>
+    <div class="stat-label">技能结构验证通过</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value info">44</div>
+    <div class="stat-label">引用文件完整性检查</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value pass">5 / 5</div>
+    <div class="stat-label">Python 脚本语法通过</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value warn">2</div>
+    <div class="stat-label">轻微建议项</div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- COMMIT INFO -->
+<section class="section">
+  <div class="section-title">提交信息</div>
+  <div class="commit-info">
+    <div>
+      <span style="color:var(--text-muted)">commit</span>
+      <span class="commit-hash">93dbb64</span>
+    </div>
+    <div style="color:var(--text-muted)">feat(ops-registry-invoke): migrate op-agent-rasd skills and agent into ops-registry-invoke plugin</div>
+    <div style="color:var(--text-faint);margin-left:auto;">+8,449 lines across 44 files</div>
+  </div>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<section class="section">
+  <div class="section-title">执行摘要</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;font-size:14px;line-height:1.7;">
+    <p style="margin-bottom:12px;">本次测试对 <strong>ops-registry-invoke</strong> 插件中新提交的 6 个技能进行了全面的结构和功能验证。这些技能覆盖了从算子名解析到最终设计文档生成的完整 NPU 算子研究流水线。</p>
+    <p style="margin-bottom:12px;"><strong>核心结论：</strong>所有 6 个技能的结构完整性、引用文件可用性、Python 脚本语法均通过验证。CANN Golden 测试（NumPy 实现）全部 11 个用例通过。跨技能数据流（研究 → 需求汇总 → 方案设计）定义清晰且一致。仅发现 2 个轻微改进建议。</p>
+    <p>包含的示例输出（MatrixSetDiagV2 算子）展示了端到端流水线的完整工作成果，质量良好。</p>
+  </div>
+</section>
+
+<!-- SKILL CARDS -->
+<section class="section">
+  <div class="section-title">技能概况</div>
+  <div class="skill-grid">
+
+    <!-- operator-name-resolver -->
+    <div class="skill-card">
+      <div class="skill-card-header">
+        <h3>operator-name-resolver</h3>
+        <span class="skill-status pass">Pass</span>
+      </div>
+      <div class="skill-card-body">
+        <p class="skill-desc">解析用户输入的算子名，在 CANN / TensorFlow / PyTorch 中跨框架搜索对应算子，生成映射表供用户确认。</p>
+        <div class="skill-meta">
+          <span class="skill-tag pass">references 4/4</span>
+          <span class="skill-tag pass">paths_config ✅</span>
+          <span class="skill-tag">TRIGGER when ✅</span>
+          <span class="skill-tag">frontmatter ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- cann-op-research -->
+    <div class="skill-card">
+      <div class="skill-card-header">
+        <h3>cann-op-research</h3>
+        <span class="skill-status pass">Pass</span>
+      </div>
+      <div class="skill-card-body">
+        <p class="skill-desc">分析 CANN 自定义算子实现，输出代码走读、设计分析、公式推导、Golden 实现四份报告。</p>
+        <div class="skill-meta">
+          <span class="skill-tag pass">references 6/6</span>
+          <span class="skill-tag pass">golden.py 11/11</span>
+          <span class="skill-tag">TRIGGER when ✅</span>
+          <span class="skill-tag">8-step exec ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- model-research -->
+    <div class="skill-card">
+      <div class="skill-card-header">
+        <h3>model-research</h3>
+        <span class="skill-status pass">Pass</span>
+      </div>
+      <div class="skill-card-body">
+        <p class="skill-desc">分析开源模型中特定算子的使用方式和数学原理，输出包含模型结构图、输入输出定义和参考链接的分析报告。</p>
+        <div class="skill-meta">
+          <span class="skill-tag pass">references 2/2</span>
+          <span class="skill-tag">knowledge base 212L</span>
+          <span class="skill-tag">TRIGGER when ✅</span>
+          <span class="skill-tag">L1→L4 search ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- opensource-op-research -->
+    <div class="skill-card">
+      <div class="skill-card-header">
+        <h3>opensource-op-research</h3>
+        <span class="skill-status warn">Pass*</span>
+      </div>
+      <div class="skill-card-body">
+        <p class="skill-desc">分析 TensorFlow/PyTorch 官方源码中算子实现，输出代码走读、实现分析、公式推导、Golden 实现四份报告，含 NPU 迁移评估。</p>
+        <div class="skill-meta">
+          <span class="skill-tag pass">references 6/6</span>
+          <span class="skill-tag warn">TF golden N/A</span>
+          <span class="skill-tag">TRIGGER when ✅</span>
+          <span class="skill-tag">GPU priority ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- req-summary -->
+    <div class="skill-card">
+      <div class="skill-card-header">
+        <h3>req-summary</h3>
+        <span class="skill-status pass">Pass</span>
+      </div>
+      <div class="skill-card-body">
+        <p class="skill-desc">汇总三个研究 Skill 的输出，结合用户需求，生成完整的需求分析文档 req_analysis.md。</p>
+        <div class="skill-meta">
+          <span class="skill-tag pass">references 3/3</span>
+          <span class="skill-tag">COPY mechanism ✅</span>
+          <span class="skill-tag">TRIGGER when ✅</span>
+          <span class="skill-tag">title numbering ✅</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- spec-to-design -->
+    <div class="skill-card">
+      <div class="skill-card-header">
+        <h3>spec-to-design</h3>
+        <span class="skill-status pass">Pass</span>
+      </div>
+      <div class="skill-card-body">
+        <p class="skill-desc">从 spec.yaml 生成 DESIGN.md 和 PLAN.md，含分段并行生成、组装及结构与完整性校验。</p>
+        <div class="skill-meta">
+          <span class="skill-tag pass">scripts 4/4 OK</span>
+          <span class="skill-tag pass">templates 2/2</span>
+          <span class="skill-tag">section-map ✅</span>
+          <span class="skill-tag pass">CLI --help ✅</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DETAILED TEST RESULTS -->
+<section class="section">
+  <div class="section-title">详细测试结果</div>
+
+  <details open>
+    <summary>结构与引用完整性</summary>
+    <div style="margin-top:12px;overflow-x:auto;">
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>技能</th>
+            <th>SKILL.md</th>
+            <th>Frontmatter</th>
+            <th>引用文件</th>
+            <th>paths_config 引用</th>
+            <th>golden_common 引用</th>
+            <th>内部交叉引用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:700">operator-name-resolver</td>
+            <td class="check-pass">✅ 76 行</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 4 / 4</td>
+            <td class="check-pass">✅</td>
+            <td>—</td>
+            <td class="check-pass">✅ 5 / 5</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">cann-op-research</td>
+            <td class="check-pass">✅ 107 行</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 6 / 6</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 9 / 9</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">model-research</td>
+            <td class="check-pass">✅ 75 行</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 2 / 2</td>
+            <td class="check-warn">⚠️ 不需要</td>
+            <td>—</td>
+            <td class="check-pass">✅</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">opensource-op-research</td>
+            <td class="check-pass">✅ 184 行</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 6 / 6</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">req-summary</td>
+            <td class="check-pass">✅ 71 行</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 3 / 3</td>
+            <td>—</td>
+            <td>—</td>
+            <td class="check-pass">✅</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">spec-to-design</td>
+            <td class="check-pass">✅ 99 行</td>
+            <td class="check-pass">✅</td>
+            <td class="check-pass">✅ 7 / 7</td>
+            <td>—</td>
+            <td>—</td>
+            <td class="check-pass">✅ 5 scripts + 2 templates</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details open>
+    <summary>Python 脚本与 Golden 测试</summary>
+    <div style="margin-top:12px;overflow-x:auto;">
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>测试项</th>
+            <th>文件</th>
+            <th>类型</th>
+            <th>结果</th>
+            <th>详情</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:700">语法检查</td>
+            <td style="font-family:var(--font-mono);font-size:11px">slice_design_inputs.py</td>
+            <td>spec-to-design</td>
+            <td class="check-pass">✅ PASS</td>
+            <td>374 行，py_compile 通过</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">语法检查</td>
+            <td style="font-family:var(--font-mono);font-size:11px">assemble_design.py</td>
+            <td>spec-to-design</td>
+            <td class="check-pass">✅ PASS</td>
+            <td>205 行，py_compile 通过</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">语法检查</td>
+            <td style="font-family:var(--font-mono);font-size:11px">validate_design.py</td>
+            <td>spec-to-design</td>
+            <td class="check-pass">✅ PASS</td>
+            <td>156 行，py_compile 通过</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">语法检查</td>
+            <td style="font-family:var(--font-mono);font-size:11px">validate_completeness.py</td>
+            <td>spec-to-design</td>
+            <td class="check-pass">✅ PASS</td>
+            <td>133 行，py_compile 通过</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">语法检查</td>
+            <td style="font-family:var(--font-mono);font-size:11px">golden_common.py</td>
+            <td>common</td>
+            <td class="check-pass">✅ PASS</td>
+            <td>237 行，8 个公共函数可导入</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">Golden 测试</td>
+            <td style="font-family:var(--font-mono);font-size:11px">cann/golden.py</td>
+            <td>MatrixSetDiagV2</td>
+            <td class="check-pass">✅ 11/11 PASS</td>
+            <td>4 dtypes × 多种 shape，All tests passed: True</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">Golden 测试</td>
+            <td style="font-family:var(--font-mono);font-size:11px">tensorflow/golden.py</td>
+            <td>MatrixSetDiagV2</td>
+            <td class="check-warn">⚠️ TF 未安装</td>
+            <td>NumPy 逻辑正确，TF 调用因环境缺少 tensorflow 包而跳过</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700">CLI 验证</td>
+            <td style="font-family:var(--font-mono);font-size:11px">4 scripts total</td>
+            <td>spec-to-design</td>
+            <td class="check-pass">✅ PASS</td>
+            <td>全部 --help 输出正确的 argparse 接口</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>参考文件完整性 — 按技能分类</summary>
+    <div style="margin-top:12px;overflow-x:auto;">
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>技能</th>
+            <th>文件</th>
+            <th>行数</th>
+            <th>用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td rowspan="4" style="font-weight:700;vertical-align:top;">operator-name-resolver</td><td style="font-family:var(--font-mono);font-size:11px">search_cann.md</td><td>91</td><td>CANN 搜索路径与命令</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">search_tensorflow.md</td><td>22</td><td>TF 搜索命令</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">search_pytorch.md</td><td>53</td><td>PyTorch + Ascend 适配搜索</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">doc_cann_adaptor_diff_tf_torch.md</td><td>88</td><td>TF/PyTorch 适配机制对比</td></tr>
+          <tr><td rowspan="6" style="font-weight:700;vertical-align:top;">cann-op-research</td><td style="font-family:var(--font-mono);font-size:11px">doc_deliverable_list.md</td><td>595</td><td>交付件类型与检索特征</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">doc_op_arch.md</td><td>604</td><td>完整架构文档</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">doc_op_arch_quick.md</td><td>113</td><td>架构速查</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">output_template.md</td><td>307</td><td>四份报告结构模板</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">formula_template.md</td><td>134</td><td>AscendC 公式推导规则</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">golden_template.md</td><td>111</td><td>Golden 实现模板</td></tr>
+          <tr><td rowspan="2" style="font-weight:700;vertical-align:top;">model-research</td><td style="font-family:var(--font-mono);font-size:11px">doc_model_knowledge.md</td><td>212</td><td>算子→模型速查知识库</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">output_template.md</td><td>58</td><td>报告结构模板</td></tr>
+          <tr><td rowspan="6" style="font-weight:700;vertical-align:top;">opensource-op-research</td><td style="font-family:var(--font-mono);font-size:11px">doc_concepts_diff_tf_torch.md</td><td>35</td><td>TF/PyTorch 概念对照</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">output_template_opensource.md</td><td>134</td><td>通用报告骨架</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">output_template_tensorflow.md</td><td>128</td><td>TF 特有检索指引</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">output_template_pytorch.md</td><td>116</td><td>PyTorch 特有检索指引</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">formula_template.md</td><td>134</td><td>开源框架公式推导规则</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">golden_template.md</td><td>233</td><td>Golden 实现模板</td></tr>
+          <tr><td rowspan="3" style="font-weight:700;vertical-align:top;">req-summary</td><td style="font-family:var(--font-mono);font-size:11px">output_template.md</td><td>155</td><td>需求分析报告结构模板</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">doc_interface_design.md</td><td>85</td><td>ACLNN/GEIR 接口设计规范</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">doc_deliverable_rules.md</td><td>68</td><td>交付件推导规则</td></tr>
+          <tr><td rowspan="7" style="font-weight:700;vertical-align:top;">spec-to-design</td><td style="font-family:var(--font-mono);font-size:11px">references/section-map.md</td><td>49</td><td>并行分段映射</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">templates/DESIGN.md.templ</td><td>224</td><td>详细设计模板</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">templates/PLAN.md.templ</td><td>47</td><td>迭代计划模板</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">scripts/slice_design_inputs.py</td><td>374</td><td>分段输入生成</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">scripts/assemble_design.py</td><td>205</td><td>文档拼装</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">scripts/validate_design.py</td><td>156</td><td>结构校验</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">scripts/validate_completeness.py</td><td>133</td><td>完整性校验</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- GOLDEN TEST OUTPUT -->
+<section class="section">
+  <div class="section-title">CANN Golden 测试输出</div>
+  <div class="golden-output">
+<span class="g-dim">============================================================</span>
+<span class="g-dim">MatrixSetDiag Golden 实现测试</span>
+<span class="g-dim">============================================================</span>
+
+Test 1: shape=(3, 3), dtype=&lt;class 'numpy.float32'&gt;
+<span class="g-pass">  [PASS]</span> output_shape: expected=(3, 3), actual=(3, 3)
+<span class="g-pass">  [PASS]</span> all_finite: found 0 non-finite values
+<span class="g-pass">  [PASS]</span> dtype_match: expected=float32, actual=float32
+<span class="g-pass">  [PASS]</span> non_diag_unchanged
+<span class="g-pass">  [PASS]</span> diag_updated: min=0.0, max=2.0
+
+Test 2: shape=(4, 6), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+Test 3: shape=(6, 4), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+Test 4: shape=(3, 3, 3), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+Test 5: shape=(2, 4, 4), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+Test 6: shape=(100, 100), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+Test 7: shape=(5, 5), dtype=&lt;class 'numpy.float64'&gt;  <span class="g-pass">[PASS]</span>
+Test 8: shape=(5, 5), dtype=&lt;class 'numpy.float16'&gt;  <span class="g-pass">[PASS]</span>
+Test 9: shape=(3, 3), dtype=&lt;class 'numpy.int32'&gt;  <span class="g-pass">[PASS]</span>
+Test 10: shape=(1, 1), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+Test 11: shape=(1000, 1000), dtype=&lt;class 'numpy.float32'&gt;  <span class="g-pass">[PASS]</span>
+
+<span class="g-dim">============================================================</span>
+<span class="g-pass">All tests passed: True</span>
+<span class="g-dim">============================================================</span></div>
+</section>
+
+<!-- DATA FLOW -->
+<section class="section">
+  <div class="section-title">跨技能数据流验证</div>
+  <div class="flow-container">
+    <div style="margin-bottom:20px;font-size:13px;color:var(--text-muted);">
+      下图展示技能间的数据依赖关系。req-summary 依赖前三个研究 Skill 的输出，spec-to-design 独立运行但承接上游需求。
+    </div>
+    <div class="flow-row">
+      <span class="flow-node resolver">operator-name-resolver</span>
+      <span class="flow-arrow">── 算子名 ──▶</span>
+      <span class="flow-node research">cann-op-research</span>
+      <span class="flow-arrow">── code_design.md ──▶</span>
+      <span class="flow-node summary">req-summary</span>
+      <span class="flow-arrow">── req_analysis.md ──▶</span>
+      <span class="flow-node design">spec-to-design</span>
+    </div>
+    <div class="flow-row" style="margin-left:180px;">
+      <span class="flow-node research">model-research</span>
+      <span class="flow-arrow">── model_research.md ──▶</span>
+      <span class="flow-node summary" style="opacity:0.5;">(aggregation)</span>
+    </div>
+    <div class="flow-row" style="margin-left:180px;">
+      <span class="flow-node research">opensource-op-research</span>
+      <span class="flow-arrow">── code_design.md ──▶</span>
+      <span class="flow-node summary" style="opacity:0.5;">(aggregation)</span>
+    </div>
+    <div style="margin-top:20px;font-size:12px;color:var(--text-muted);">
+      ✅ 数据流一致性检查通过。示例数据（MatrixSetDiagV2）验证了完整流水线：<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;model_research.md (246L) → TF code_design.md (277L) → CANN code_design.md (276L) → req_analysis.md (989L)
+    </div>
+  </div>
+</section>
+
+<!-- SAMPLE OUTPUT -->
+<section class="section">
+  <div class="section-title">示例输出质量评估</div>
+  <div style="overflow-x:auto;">
+    <table class="detail-table">
+      <thead>
+        <tr>
+          <th>输出文件</th>
+          <th>行数</th>
+          <th>内容质量</th>
+          <th>评估</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">cann/code_walkthrough.md</td>
+          <td>513</td>
+          <td>按调用链路组织，含 Mermaid 流程图、关键代码 + 内联注释，覆盖 GEIR→OpDef→Shape→Tiling→Kernel→框架适配全链路</td>
+          <td class="check-pass">✅ 优秀</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">cann/code_design.md</td>
+          <td>276</td>
+          <td>交付件覆盖总览表开头，按交付件类型分章设计分析，含类型支持矩阵和平台适配说明</td>
+          <td class="check-pass">✅ 优秀</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">cann/formula.md</td>
+          <td>134</td>
+          <td>从 AscendC kernel 提取数学公式，LaTeX 格式，标注 kernel 源码位置</td>
+          <td class="check-pass">✅ 良好</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">cann/golden.py</td>
+          <td>136</td>
+          <td>纯 NumPy 实现，11 个测试覆盖 4 种 dtype × 多种 shape（含 1×1 边界和 1000×1000 大规模），自校验通过</td>
+          <td class="check-pass">✅ 优秀</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">model_research.md</td>
+          <td>246</td>
+          <td>含模型场景、分析、综合对比、调用模式建议、语义演进关系和参考总表</td>
+          <td class="check-pass">✅ 良好</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">tf/code_walkthrough.md</td>
+          <td>408</td>
+          <td>按 TF 调用链路组织，含 Python API → REGISTER_OP → OpKernel → GPU Kernel</td>
+          <td class="check-pass">✅ 良好</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">tf/code_design.md</td>
+          <td>277</td>
+          <td>结构化设计分析，含注册信息、类型约束、GPU Kernel 实现方案</td>
+          <td class="check-pass">✅ 良好</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">req_analysis.md</td>
+          <td>989</td>
+          <td>完整需求分析，含 8 个章节：需求背景、模型分析、竞品分析(TF)、CANN 方案、框架差异对比、客户需求、需求分析总结</td>
+          <td class="check-pass">✅ 优秀</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ISSUES -->
+<section class="section">
+  <div class="section-title">发现与建议</div>
+  <ul class="issue-list">
+    <li class="issue-item">
+      <span class="issue-icon info">ℹ️</span>
+      <div>
+        <strong>spec-to-design: 描述格式不一致</strong><br>
+        <span style="color:var(--text-muted);">当前描述未使用 "TRIGGER when" 模式，而是采用自然语言描述。其他 5 个技能均使用 TRIGGER when 格式。建议统一以提升触发一致性。</span>
+      </div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-icon info">ℹ️</span>
+      <div>
+        <strong>opensource-op-research: TF Golden 测试依赖环境</strong><br>
+        <span style="color:var(--text-muted);">TF golden.py 需要 TensorFlow 运行时才能完整验证。在 CI 环境中需确保 TensorFlow 已安装。NumPy 纯实现部分可独立工作。</span>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- COMMON INFRASTRUCTURE -->
+<section class="section">
+  <div class="section-title">公共基础设施</div>
+  <div style="overflow-x:auto;">
+    <table class="detail-table">
+      <thead>
+        <tr>
+          <th>文件</th>
+          <th>行数</th>
+          <th>说明</th>
+          <th>被引用</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">common/paths_config.md</td>
+          <td>141</td>
+          <td>统一源码路径与搜索层级配置（唯一权威来源）</td>
+          <td>operator-name-resolver, cann-op-research, opensource-op-research</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">common/formula_template.md</td>
+          <td>139</td>
+          <td>通用公式报告结构与 LaTeX 符号表</td>
+          <td>cann-op-research, opensource-op-research</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">common/doc_code_annotation_style.md</td>
+          <td>62</td>
+          <td>代码注释风格规范</td>
+          <td>cann-op-research</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">common/doc_mermaid_style.md</td>
+          <td>262</td>
+          <td>Mermaid 流程图绘制规范</td>
+          <td>model-research</td>
+        </tr>
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:12px">common/scripts/golden_common.py</td>
+          <td>237</td>
+          <td>Golden 实现公共模块（8 个可导入函数）</td>
+          <td>cann-op-research, opensource-op-research</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FINAL VERDICT -->
+<section class="section">
+  <div class="section-title">最终结论</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div style="background:var(--pass-bg);border:1px solid rgba(26,125,60,0.2);border-radius:var(--radius);padding:20px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--pass);margin-bottom:8px;">已通过 ✓</div>
+      <ul style="list-style:none;font-size:13px;line-height:1.8;">
+        <li>✅ 6/6 技能 SKILL.md 结构完整</li>
+        <li>✅ 6/6 技能 frontmatter 正确</li>
+        <li>✅ 28/28 引用文件全部存在</li>
+        <li>✅ 5/5 Python 脚本语法通过</li>
+        <li>✅ 4/4 spec-to-design 脚本 CLI 正常</li>
+        <li>✅ CANN golden.py 11/11 用例通过</li>
+        <li>✅ 跨技能数据流一致</li>
+        <li>✅ 示例输出质量良好</li>
+      </ul>
+    </div>
+    <div style="background:var(--warn-bg);border:1px solid rgba(184,110,0,0.2);border-radius:var(--radius);padding:20px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--warn);margin-bottom:8px;">建议改进 ⚡</div>
+      <ul style="list-style:none;font-size:13px;line-height:1.8;">
+        <li>💡 spec-to-design 统一 TRIGGER when</li>
+        <li>💡 TF golden 测试 CI 环境配置</li>
+      </ul>
+      <div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--pass);text-align:center;">
+        综合评级：通过 — 可以部署使用
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  Ops-Registry-Invoke Skills Test Report · 2026-05-22 · Commit 93dbb64 · Generated by automated validation pipeline
+</footer>
+
+</body>
+</html>

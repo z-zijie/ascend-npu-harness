@@ -1,0 +1,18 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/developer/workspace/harness/tests/test_transpose_2d_4d.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"host",
+			"golden",
+			"layout"
+		],
+		"name" : "test_transpose_2d_4d"
+	}
+}

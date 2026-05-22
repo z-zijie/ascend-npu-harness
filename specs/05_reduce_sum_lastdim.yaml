@@ -1,0 +1,139 @@
+schema_version: "1.0"
+
+name: reduce_sum_lastdim
+category: reduction
+target_arch: dav-2201
+
+summary: |
+  Sum reduction over the last dimension of a 2D or 3D tensor.
+  For a 2D input [M, K], the output is [M].
+  For a 3D input [B, M, K], the output is [B, M].
+  Accumulation is always performed in float32 regardless of input dtype.
+
+math:
+  definition: |
+    2D case: out[i] = sum_{j=0}^{K-1} x[i, j]
+
+    3D case: out[b, i] = sum_{j=0}^{K-1} x[b, i, j]
+  equations:
+    - "out[..., i] = sum_j x[..., i, j]"
+  notes:
+    - "Reduction is always over the last axis (dim = -1)"
+    - "Accumulation uses float32 for numerical stability regardless of input dtype"
+    - "For float16 input, intermediate accumulators are float32, final result cast back"
+
+inputs:
+  - name: x
+    dtype: [float32, float16]
+    shape: "2D: [M, K]; 3D: [B, M, K]"
+    layout: contiguous
+    role: "input tensor to reduce"
+
+outputs:
+  - name: out
+    dtype: [float32, float16]
+    shape: "2D case: [M]; 3D case: [B, M]"
+    layout: contiguous
+
+parameters:
+  - name: dim
+    type: int
+    default: -1
+    description: "Axis along which to reduce (always -1 / last dimension)"
+
+  - name: keepdim
+    type: bool
+    default: false
+    description: "Whether to keep the reduced dimension as size 1"
+
+shape_symbols:
+  M:
+    description: "Rows (or second-to-last dimension)"
+    values: [1, 3, 64, 257]
+  K:
+    description: "Columns / reduction dimension"
+    values: [1, 7, 32, 128, 1024, 4096]
+  B:
+    description: "Batch dimension (only for 3D case)"
+    values: [1, 2, 8]
+
+shape_rules:
+  - "2D input:  x.shape == [M, K]"
+  - "2D output: out.shape == [M]"
+  - "3D input:  x.shape == [B, M, K]"
+  - "3D output: out.shape == [B, M]"
+  - "K >= 1, M >= 1"
+  - "If keepdim=True: out.shape == [M, 1] or [B, M, 1]"
+
+dtype_rules:
+  - "dtype(out) == dtype(x)"
+  - "dtype(x) in {float32, float16}"
+  - "Internal accumulation dtype is always float32"
+
+layout_rules:
+  - "Input must be contiguous in memory"
+  - "Output is contiguous"
+
+broadcasting: false
+
+masking: false
+
+tiling:
+  description: |
+    Partition the non-reduced dimensions across AI Cores.
+    Within each core, reduce along K using a tree-reduction pattern
+    with float32 accumulators for numerical stability.
+  tile_k: 256
+  reduction_style: "vectorized warp-level tree reduction"
+
+implementation:
+  language: AscendC
+  style: "tiled reduction with float32 accumulator"
+  strategy: |
+    Split work across AI Cores along the M (and B) dimension.
+    Each core loads a contiguous slice of K elements, performs a
+    two-level reduction: first vectorized partial sums in registers,
+    then a shuffle/warp-level tree reduction. Final result is written
+    back in the input's original dtype after a float32->dtype conversion.
+
+accuracy:
+  float32:
+    abs: 1.0e-4
+    rel: 1.0e-4
+  float16:
+    abs: 5.0e-2
+    rel: 5.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    # 2D cases: [M, K]
+    - [1, 1]
+    - [1, 1024]
+    - [3, 128]
+    - [64, 4096]
+    - [257, 7]
+    # 3D cases: [B, M, K]
+    - [1, 1, 32]
+    - [2, 3, 128]
+    - [8, 64, 1024]
+  edge_cases:
+    - "K=1        reduction over single element (identity)"
+    - "M=1        single row"
+    - "K=4096     large reduction dimension"
+    - "M=257      non-power-of-2 row count"
+  invalid_cases:
+    - "dim != -1  reduction over non-last axis not supported"
+    - "keepdim with unsupported value"
+    - "1D input   rank < 2 not supported"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

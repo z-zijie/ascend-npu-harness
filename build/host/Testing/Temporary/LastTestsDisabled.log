@@ -1,0 +1,4 @@
+4:ElementwiseAdd.NpuSkipIfUnavailable
+16:AxpyScalarAffine.NpuSkipIfUnavailable
+35:BroadcastBinary.NpuSkipIfUnavailable
+61:ReduceSumLastdim.NpuSkipIfUnavailable

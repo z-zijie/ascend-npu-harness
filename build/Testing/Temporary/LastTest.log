@@ -1,0 +1,465 @@
+Start testing: May 22 10:47 CST
+----------------------------------------------------------
+138/167 Testing: FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32
+138/167 Test: FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32
+[       OK ] FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H4_Sq1_Sk1_D32" time elapsed: 00:00:00
+----------------------------------------------------------
+
+139/167 Testing: FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64
+139/167 Test: FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64
+[       OK ] FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H1_Sq16_Sk16_D64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+140/167 Testing: FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32
+140/167 Test: FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32
+[       OK ] FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H8_Sq16_Sk16_D32" time elapsed: 00:00:00
+----------------------------------------------------------
+
+141/167 Testing: FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64
+141/167 Test: FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64
+[       OK ] FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64 (1 ms)
+[----------] 1 test from FlashAttentionTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B2_H4_Sq16_Sk16_D64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+142/167 Testing: FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32
+142/167 Test: FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32
+[       OK ] FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32" end time: May 22 10:47 CST
+"FlashAttentionTest.Causal_B1_H4_Sq8_Sk8_D32" time elapsed: 00:00:00
+----------------------------------------------------------
+
+143/167 Testing: FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64
+143/167 Test: FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64
+[       OK ] FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64" end time: May 22 10:47 CST
+"FlashAttentionTest.Causal_B1_H1_Sq16_Sk16_D64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+144/167 Testing: FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128
+144/167 Test: FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128
+[       OK ] FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128 (15 ms)
+[----------] 1 test from FlashAttentionTest (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (15 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128" end time: May 22 10:47 CST
+"FlashAttentionTest.Causal_B2_H4_Sq32_Sk32_D128" time elapsed: 00:00:00
+----------------------------------------------------------
+
+145/167 Testing: FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64
+145/167 Test: FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64
+[       OK ] FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H4_Sq8_Sk16_D64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+146/167 Testing: FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128
+146/167 Test: FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128
+[       OK ] FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H2_Sq4_Sk32_D128" time elapsed: 00:00:00
+----------------------------------------------------------
+
+147/167 Testing: FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64
+147/167 Test: FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64
+[       OK ] FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64 (11 ms)
+[----------] 1 test from FlashAttentionTest (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (11 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H4_Sq64_Sk64_D64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+148/167 Testing: FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64
+148/167 Test: FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64
+[       OK ] FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64 (15 ms)
+[----------] 1 test from FlashAttentionTest (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (15 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64" end time: May 22 10:47 CST
+"FlashAttentionTest.Causal_B1_H4_Sq64_Sk64_D64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+149/167 Testing: FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32
+149/167 Test: FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32
+[       OK ] FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32 (10 ms)
+[----------] 1 test from FlashAttentionTest (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (10 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32" end time: May 22 10:47 CST
+"FlashAttentionTest.NoMask_B1_H2_Sq128_Sk128_D32" time elapsed: 00:00:00
+----------------------------------------------------------
+
+150/167 Testing: FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32
+150/167 Test: FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32
+[       OK ] FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32 (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32" end time: May 22 10:47 CST
+"FlashAttentionTest.DvDiff_B1_H4_Sq8_Sk8_D64_Dv32" time elapsed: 00:00:00
+----------------------------------------------------------
+
+151/167 Testing: FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64
+151/167 Test: FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64
+[       OK ] FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64 (1 ms)
+[----------] 1 test from FlashAttentionTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64" end time: May 22 10:47 CST
+"FlashAttentionTest.DvDiff_B1_H4_Sq16_Sk16_D128_Dv64" time elapsed: 00:00:00
+----------------------------------------------------------
+
+152/167 Testing: FlashAttentionTest.CausalConstraintVerification
+152/167 Test: FlashAttentionTest.CausalConstraintVerification
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.CausalConstraintVerification" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.CausalConstraintVerification" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.CausalConstraintVerification
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.CausalConstraintVerification
+[       OK ] FlashAttentionTest.CausalConstraintVerification (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.CausalConstraintVerification" end time: May 22 10:47 CST
+"FlashAttentionTest.CausalConstraintVerification" time elapsed: 00:00:00
+----------------------------------------------------------
+
+153/167 Testing: FlashAttentionTest.ScaleInvariance
+153/167 Test: FlashAttentionTest.ScaleInvariance
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.ScaleInvariance" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.ScaleInvariance" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.ScaleInvariance
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.ScaleInvariance
+[       OK ] FlashAttentionTest.ScaleInvariance (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.ScaleInvariance" end time: May 22 10:47 CST
+"FlashAttentionTest.ScaleInvariance" time elapsed: 00:00:00
+----------------------------------------------------------
+
+154/167 Testing: FlashAttentionTest.ProbabilitiesSumToOne
+154/167 Test: FlashAttentionTest.ProbabilitiesSumToOne
+Command: "/home/developer/workspace/harness/build/tests/test_flash_attention_fwd_fused" "--gtest_filter=FlashAttentionTest.ProbabilitiesSumToOne" "--gtest_also_run_disabled_tests"
+Directory: /home/developer/workspace/harness/build/tests
+"FlashAttentionTest.ProbabilitiesSumToOne" start time: May 22 10:47 CST
+Output:
+----------------------------------------------------------
+Running main() from ./googletest/src/gtest_main.cc
+Note: Google Test filter = FlashAttentionTest.ProbabilitiesSumToOne
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FlashAttentionTest
+[ RUN      ] FlashAttentionTest.ProbabilitiesSumToOne
+[       OK ] FlashAttentionTest.ProbabilitiesSumToOne (0 ms)
+[----------] 1 test from FlashAttentionTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"FlashAttentionTest.ProbabilitiesSumToOne" end time: May 22 10:47 CST
+"FlashAttentionTest.ProbabilitiesSumToOne" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: May 22 10:47 CST
+
+host =   0.08 sec*proc
+

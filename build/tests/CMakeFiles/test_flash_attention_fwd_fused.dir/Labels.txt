@@ -1,0 +1,8 @@
+# Target labels
+ host
+ golden
+ flash_attention
+ attention
+ llm
+# Source files and their labels
+/home/developer/workspace/harness/tests/test_flash_attention_fwd_fused.cpp

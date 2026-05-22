@@ -1,0 +1,245 @@
+schema_version: "1.0"
+
+name: flash_attention_fwd_fused
+category: attention
+target_arch: dav-2201
+
+summary: |
+  Fused Flash Attention forward pass with online softmax and optional causal
+  masking. Computes O = softmax(Q @ K^T * scale + mask) @ V.
+  Implements the tiled online softmax algorithm to avoid materializing the
+  full S x S attention score matrix, enabling O(S) memory complexity instead
+  of O(S^2). This is a performance-critical kernel.
+
+math:
+  definition: |
+    S = Q @ K^T * scale          # attention scores [B, H, S_q, S_k]
+    if causal mask:
+      S[i, j] = -inf for j > i   # mask upper triangle
+    P = softmax(S, dim=-1)        # [B, H, S_q, S_k]
+    O = P @ V                     # [B, H, S_q, D_v]
+
+    Online softmax (tiled):
+      For each block of K/V:
+        compute S_block = Q_block @ K_block^T * scale
+        apply mask to S_block
+        compute m_new = max(m_old, row_max(S_block))
+        compute P_block = exp(S_block - m_new)
+        update running sum: l_new = l_old * exp(m_old - m_new) + row_sum(P_block)
+        update output: O = O * (l_old / l_new) * exp(m_old - m_new) + P_block @ V_block
+        m_old = m_new, l_old = l_new
+    Final: O = O / l_new
+  equations:
+    - "S = Q @ K^T * scale"
+    - "scale = 1 / sqrt(D)"
+    - "mask[i,j] = 0 (none) or -inf if j > i (causal)"
+    - "P = softmax(S + mask)"
+    - "O = P @ V"
+  notes:
+    - "Flash Attention: tiles Q, K, V to avoid O(S^2) memory"
+    - "Online softmax: computes softmax normalization incrementally per block"
+    - "scale = 1/sqrt(D) is the standard Transformer attention scaling"
+    - "D_v may equal D or differ (multi-query / grouped-query attention)"
+    - "causal mask sets upper-triangular positions to -inf before softmax"
+    - "Input tensors are in float16; internal accumulation uses float32"
+
+inputs:
+  - name: Q
+    dtype: [float16]
+    shape: "[B, H, S_q, D]"
+    layout: contiguous
+    role: "query tensor"
+
+  - name: K
+    dtype: [float16]
+    shape: "[B, H, S_k, D]"
+    layout: contiguous
+    role: "key tensor"
+
+  - name: V
+    dtype: [float16]
+    shape: "[B, H, S_k, D_v]"
+    layout: contiguous
+    role: "value tensor"
+
+outputs:
+  - name: O
+    dtype: [float16]
+    shape: "[B, H, S_q, D_v]"
+    layout: contiguous
+
+parameters:
+  - name: scale
+    type: float
+    default: null
+    description: "Attention score scaling factor. If null, defaults to 1/sqrt(D)"
+
+  - name: causal
+    type: bool
+    default: false
+    description: "If true, apply causal (lower-triangular) mask"
+
+  - name: mask
+    type: string
+    values: [none, causal, custom]
+    default: none
+    description: "Type of attention mask to apply"
+
+shape_symbols:
+  B:
+    description: "Batch size"
+    values: [1, 2]
+  H:
+    description: "Number of attention heads"
+    values: [1, 4, 8]
+  S_q:
+    description: "Query sequence length"
+    values: [1, 16, 64, 128, 512]
+  S_k:
+    description: "Key sequence length"
+    values: [1, 16, 64, 128, 512]
+  D:
+    description: "Query/Key head dimension"
+    values: [32, 64, 128]
+  D_v:
+    description: "Value head dimension (may equal D)"
+    values: [32, 64, 128]
+
+shape_rules:
+  - "Q.shape == [B, H, S_q, D]"
+  - "K.shape == [B, H, S_k, D]"
+  - "V.shape == [B, H, S_k, D_v]"
+  - "O.shape == [B, H, S_q, D_v]"
+  - "S_q >= 1, S_k >= 1"
+  - "D >= 1, D_v >= 1"
+  - "For non-causal: S_q and S_k may differ"
+  - "For causal: S_q <= S_k is typical (self-attention: S_q == S_k)"
+
+dtype_rules:
+  - "All input and output tensors are float16"
+  - "Internal accumulation for softmax (exp, sum, max) uses float32"
+  - "Q @ K^T matrix multiply uses float32 accumulation"
+  - "P @ V matrix multiply uses float32 accumulation"
+  - "Final output O is cast to float16"
+
+layout_rules:
+  - "All tensors must be contiguous in memory"
+  - "Layout is [B, H, S, D/D_v] (batch, head, sequence, depth)"
+
+broadcasting: false
+
+masking:
+  supported: true
+  types:
+    - none
+    - causal
+  causal_description: |
+    Causal mask: sets S[i, j] = -inf for all j > i.
+    Before softmax, the upper triangular portion of the attention score
+    matrix is set to negative infinity, causing those positions to have
+    zero probability after softmax. Applied per-head, per-batch.
+
+tiling:
+  description: |
+    Flash Attention tiling with online softmax. The algorithm tiles over
+    the S_q (query sequence) and S_k (key sequence) dimensions.
+
+    Outer loop: iterate over Q tiles (size tile_q along S_q)
+    Inner loop: iterate over K/V tiles (size tile_kv along S_k)
+      - For causal: skip K/V tiles where all positions are masked (j > i for all i in tile)
+      - Each inner iteration: compute partial softmax, update running stats
+    After K/V loop: rescale output by final softmax denominator
+
+  tile_q: 32
+  tile_kv: 32
+  tile_d: 32
+  strategy: |
+    Tile Q into blocks of [B, H, tile_q, D]
+    Tile K into blocks of [B, H, tile_kv, D]
+    Tile V into blocks of [B, H, tile_kv, D_v]
+
+    For each Q tile:
+      Initialize: O_tile = 0, m = -inf, l = 0
+      For each K/V tile:
+        1. Compute S_tile = Q_tile @ K_tile^T * scale  [tile_q, tile_kv]
+        2. Apply causal mask if enabled
+        3. m_new = max(m, row_max(S_tile))            [tile_q]
+        4. P_tile = exp(S_tile - m_new)                [tile_q, tile_kv]
+        5. l_new = l * exp(m - m_new) + row_sum(P_tile) [tile_q]
+        6. O_tile = O_tile * exp(m - m_new)            rescale
+        7. O_tile += P_tile @ V_tile                   accumulate
+        8. m = m_new, l = l_new
+      O_tile = O_tile / l                              final rescale
+      Store O_tile
+
+implementation:
+  language: AscendC
+  style: "custom tiled flash attention kernel with online softmax"
+  description: |
+    Custom AscendC kernel implementing the Flash Attention forward pass.
+    Uses tiled matrix multiply for Q@K^T and P@V, with online softmax
+    to maintain O(S) memory. The kernel is fully self-contained and does
+    not materialize the full N^2 attention matrix.
+  key_features:
+    - "Online softmax for O(S) memory complexity"
+    - "Tiled GEMM for Q@K^T and P@V"
+    - "Causal mask support with triangular tile skipping"
+    - "float32 accumulation throughout for numerical stability"
+    - "Scale factor fused into the attention score computation"
+
+accuracy:
+  float16:
+    abs: 1.0e-1
+    rel: 1.0e-1
+
+performance:
+  required: true
+  targets:
+    - name: "small attention"
+      shape: {B: 1, H: 8, S_q: 128, S_k: 128, D: 64, D_v: 64}
+      dtype: float16
+      metric: latency_us
+      target: "<= 200"
+    - name: "large sequence attention"
+      shape: {B: 1, H: 4, S_q: 512, S_k: 512, D: 64, D_v: 64}
+      dtype: float16
+      metric: latency_us
+      target: "<= 2000"
+  tuning_budget: "high"
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    - {B: 1, H: 1, S_q: 1, S_k: 1, D: 32, D_v: 32}
+    - {B: 1, H: 1, S_q: 16, S_k: 16, D: 64, D_v: 64}
+    - {B: 1, H: 4, S_q: 64, S_k: 64, D: 64, D_v: 64}
+    - {B: 1, H: 8, S_q: 128, S_k: 128, D: 64, D_v: 64}
+    - {B: 2, H: 4, S_q: 64, S_k: 128, D: 128, D_v: 128}
+    - {B: 1, H: 8, S_q: 512, S_k: 512, D: 64, D_v: 64}
+    - {B: 2, H: 8, S_q: 128, S_k: 128, D: 128, D_v: 128}
+  mask_scenarios:
+    - mask: none
+      shapes: all above
+    - mask: causal
+      shapes: shapes where S_q == S_k
+  edge_cases:
+    - "S_q=1, S_k=1       single query, single key"
+    - "D=32               minimal head dimension"
+    - "H=1                single head"
+    - "D=128              larger head dimension"
+    - "S_q=512            large sequence length"
+    - "mask=none, S_q != S_k  cross-attention style"
+  invalid_cases:
+    - "D mismatch between Q and K"
+    - "S_k mismatch between K and V"
+    - "causal mask with S_q > S_k  (for self-attention, typically S_q == S_k)"
+    - "dtype not float16"
+    - "negative or zero dimensions"
+    - "H=0  zero heads"
+
+benchmark:
+  required: true
+  warmup: 50
+  iterations: 200
+
+status: draft

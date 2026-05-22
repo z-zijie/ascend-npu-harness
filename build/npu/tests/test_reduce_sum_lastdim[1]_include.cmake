@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/npu/tests/test_reduce_sum_lastdim[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/npu/tests/test_reduce_sum_lastdim[1]_tests.cmake")
+else()
+  add_test(test_reduce_sum_lastdim_NOT_BUILT test_reduce_sum_lastdim_NOT_BUILT)
+endif()

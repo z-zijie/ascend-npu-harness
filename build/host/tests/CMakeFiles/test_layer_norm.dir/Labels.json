@@ -1,0 +1,20 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/developer/workspace/harness/tests/test_layer_norm.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"host",
+			"golden",
+			"normalization",
+			"reduction",
+			"elementwise"
+		],
+		"name" : "test_layer_norm"
+	}
+}

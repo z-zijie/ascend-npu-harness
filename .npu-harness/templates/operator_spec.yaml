@@ -1,0 +1,97 @@
+# Template: Operator SPEC.yaml
+schema_version: 1
+name: "TEMPLATE_OP_NAME"
+category: "elementwise"
+target_arch: "dav-2201"
+
+summary: "Brief description of what this operator computes."
+
+math:
+  definition: "Mathematical formula"
+  equations:
+    - "y = f(x)"
+  notes: []
+
+inputs:
+  - name: x
+    dtype: ["float32", "float16"]
+    shape: ["N"]
+    layout: "contiguous"
+    role: "activation"
+
+outputs:
+  - name: y
+    dtype: ["float32", "float16"]
+    shape: ["N"]
+    layout: "contiguous"
+
+parameters:
+  - name: eps
+    type: float
+    default: 1.0e-5
+
+shape_symbols:
+  N:
+    allowed: [1, 8, 64, 128, 1024, 4096]
+
+shape_rules: []
+
+dtype_rules:
+  accumulation: "float32"
+  output_cast: "same_as_input"
+
+layout_rules:
+  contiguous_required: true
+  supported_layouts: ["ND"]
+
+broadcasting:
+  supported: false
+  rules: []
+
+masking:
+  supported: false
+  types: []
+
+tiling:
+  strategy: "auto"
+  constraints: []
+  workspace: "optional"
+
+implementation:
+  cpu_golden: "required"
+  ascend_kernel: "required"
+  direct_launch: "required"
+  framework_substitution_allowed: false
+
+accuracy:
+  float32:
+    abs: 1.0e-5
+    rel: 1.0e-5
+  float16:
+    abs: 1.0e-2
+    rel: 1.0e-2
+
+performance:
+  required: false
+  targets: []
+  tuning_budget:
+    max_iterations: 5
+
+tests:
+  deterministic_seed: 20260522
+  shapes: []
+  edge_cases: []
+  invalid_cases: []
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status:
+  generated: false
+  built: false
+  host_tested: false
+  npu_tested: false
+  accuracy_passed: false
+  performance_passed: false

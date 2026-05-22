@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "host",
+      "displayName": "Host-only (CPU golden + GTest)",
+      "description": "Build without CANN/NPU. CPU golden and GTest only.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/host",
+      "cacheVariables": {
+        "HARNESS_ENABLE_ASCEND": "OFF",
+        "HARNESS_ENABLE_TESTS": "ON",
+        "HARNESS_ENABLE_BENCHMARKS": "ON",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "npu",
+      "displayName": "NPU (Ascend C + direct launch)",
+      "description": "Full build with Ascend C kernels and NPU tests.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/npu",
+      "cacheVariables": {
+        "HARNESS_ENABLE_ASCEND": "ON",
+        "HARNESS_NPU_ARCH": "dav-2201",
+        "HARNESS_ENABLE_TESTS": "ON",
+        "HARNESS_ENABLE_BENCHMARKS": "ON",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "host-debug",
+      "displayName": "Host-only Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/host-debug",
+      "cacheVariables": {
+        "HARNESS_ENABLE_ASCEND": "OFF",
+        "HARNESS_ENABLE_TESTS": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "npu-release",
+      "displayName": "NPU Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/npu-release",
+      "cacheVariables": {
+        "HARNESS_ENABLE_ASCEND": "ON",
+        "HARNESS_NPU_ARCH": "dav-2201",
+        "HARNESS_ENABLE_TESTS": "ON",
+        "HARNESS_ENABLE_BENCHMARKS": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
+}

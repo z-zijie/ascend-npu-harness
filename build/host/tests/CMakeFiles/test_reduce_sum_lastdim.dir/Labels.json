@@ -1,0 +1,18 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/developer/workspace/harness/tests/test_reduce_sum_lastdim.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"host",
+			"golden",
+			"reduction"
+		],
+		"name" : "test_reduce_sum_lastdim"
+	}
+}

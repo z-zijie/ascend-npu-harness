@@ -1,0 +1,133 @@
+schema_version: "1.0"
+
+name: activation_gelu_silu
+category: elementwise
+target_arch: dav-2201
+
+summary: |
+  Elementwise fused activation kernel implementing both GELU (Gaussian Error
+  Linear Unit) and SiLU (Sigmoid Linear Unit, also known as Swish).
+  The kernel computes the selected activation for every element of the input tensor.
+
+math:
+  definition: |
+    GELU(x) = 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
+
+    SiLU(x) = x * sigmoid(x) = x / (1 + exp(-x))
+  equations:
+    - "GELU(x) = 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))"
+    - "SiLU(x) = x / (1 + exp(-x))"
+    - "sqrt(2/pi) ≈ 0.7978845608"
+  notes:
+    - "GELU uses the tanh approximation (not the exact erf form)"
+    - "SiLU is numerically equivalent to x * sigmoid(x)"
+    - "Both functions are smooth, non-monotonic for negative inputs"
+    - "Fused kernel selects activation via a runtime parameter"
+
+inputs:
+  - name: x
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+    role: "input tensor"
+
+outputs:
+  - name: y
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+
+parameters:
+  - name: activation
+    type: enum
+    values: [gelu, silu]
+    default: gelu
+    description: "Which activation function to apply"
+
+  - name: approximate
+    type: string
+    values: [tanh]
+    default: tanh
+    description: "GELU approximation method (only tanh is supported)"
+
+shape_symbols:
+  S:
+    description: "Shape of input and output tensor"
+    examples:
+      - "[128]"
+      - "[1024]"
+      - "[8, 512]"
+      - "[2, 16, 128]"
+
+shape_rules:
+  - "output_y.shape == input_x.shape"
+
+dtype_rules:
+  - "dtype(y) == dtype(x)"
+  - "dtype(x) in {float32, float16}"
+
+layout_rules:
+  - "Input and output must be contiguous in memory"
+
+broadcasting: false
+
+masking: false
+
+tiling:
+  description: "1D tiling along the flattened element count"
+  tile_size: 1024
+
+implementation:
+  language: AscendC
+  style: "vectorized elementwise activation kernel"
+  strategy: |
+    Each AI Core loads a tile, applies the selected activation elementwise.
+    For GELU: compute x^3, scale, add identity, apply tanh, scale, multiply.
+    For SiLU: compute exp(-x), broadcast scalar 1, add, reciprocal, multiply by x.
+    Use lookup tables or polynomial approximations for exp and tanh on hardware.
+
+accuracy:
+  float32:
+    abs: 1.0e-5
+    rel: 1.0e-5
+  float16:
+    abs: 2.0e-2
+    rel: 2.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    - [128]
+    - [1024]
+    - [8, 512]
+    - [2, 16, 128]
+  test_values:
+    - -20.0
+    - -10.0
+    - -5.0
+    - -1.0
+    - 0.0
+    - 1.0
+    - 5.0
+    - 10.0
+    - 20.0
+  edge_cases:
+    - "x = 0        GELU(0) ≈ 0, SiLU(0) = 0"
+    - "x very large positive  saturates at x"
+    - "x very large negative  saturates at 0"
+    - "x ≈ -0.5     near GELU minimum"
+  invalid_cases:
+    - "activation not in {gelu, silu}"
+    - "NaN input propagation"
+    - "Inf input: GELU(+Inf)=+Inf, GELU(-Inf)=0, SiLU(+Inf)=+Inf, SiLU(-Inf)=0"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

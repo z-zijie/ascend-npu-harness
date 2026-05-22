@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/host/tests/test_elementwise_add[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/host/tests/test_elementwise_add[1]_tests.cmake")
+else()
+  add_test(test_elementwise_add_NOT_BUILT test_elementwise_add_NOT_BUILT)
+endif()

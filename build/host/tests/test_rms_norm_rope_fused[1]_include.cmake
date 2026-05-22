@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/host/tests/test_rms_norm_rope_fused[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/host/tests/test_rms_norm_rope_fused[1]_tests.cmake")
+else()
+  add_test(test_rms_norm_rope_fused_NOT_BUILT test_rms_norm_rope_fused_NOT_BUILT)
+endif()

@@ -1,0 +1,155 @@
+schema_version: "1.0"
+
+name: transpose_2d_4d
+category: layout
+target_arch: dav-2201
+
+summary: |
+  Tensor transpose operation supporting 2D matrix transpose ([M,N] -> [N,M])
+  and 4D layout conversion between NCHW and NHWC formats.
+  Pure data movement, no arithmetic involved.
+
+math:
+  definition: |
+    2D case: output[j, i] = input[i, j]
+
+    4D NCHW-to-NHWC case: output[n, h, w, c] = input[n, c, h, w]
+    4D NHWC-to-NCHW case: output[n, c, h, w] = input[n, h, w, c]
+  equations:
+    - "2D: out[j][i] = in[i][j]"
+    - "4D NCHW->NHWC: out[n][h][w][c] = in[n][c][h][w]"
+    - "4D NHWC->NCHW: out[n][c][h][w] = in[n][h][w][c]"
+  notes:
+    - "Pure data movement / layout transformation kernel"
+    - "No floating-point arithmetic involved"
+    - "int32 is supported for exact comparison testing"
+    - "For float dtypes, the data is bitwise identical to input"
+
+inputs:
+  - name: x
+    dtype: [float32, float16, int32]
+    shape: |
+      2D: [M, N]
+      4D: [N, C, H, W] for NCHW input, or [N, H, W, C] for NHWC input
+    layout: |
+      2D: any contiguous
+      4D: NCHW or NHWC
+    role: "input tensor to transpose"
+
+outputs:
+  - name: y
+    dtype: [float32, float16, int32]
+    shape: |
+      2D: [N, M]
+      4D NCHW->NHWC: [N, H, W, C]
+      4D NHWC->NCHW: [N, C, H, W]
+    layout: |
+      2D: contiguous
+      4D: NHWC (from NCHW input) or NCHW (from NHWC input)
+
+parameters:
+  - name: perm
+    type: "list[int]"
+    description: "Permutation of dimensions"
+    examples:
+      - "2D: [1, 0]"
+      - "4D NCHW->NHWC: [0, 2, 3, 1]"
+      - "4D NHWC->NCHW: [0, 3, 1, 2]"
+
+  - name: mode
+    type: enum
+    values: [2d, nchw_to_nhwc, nhwc_to_nchw]
+    description: "Transpose mode selector"
+
+shape_symbols:
+  M:
+    description: "Rows in 2D mode"
+    examples: [1, 3, 32, 128, 257]
+  N:
+    description: "Columns in 2D mode"
+    examples: [1, 7, 32, 64, 129]
+
+shape_rules:
+  - "2D mode: input.shape == [M, N] -> output.shape == [N, M]"
+  - "4D NCHW->NHWC: input [N, C, H, W] -> output [N, H, W, C]"
+  - "4D NHWC->NCHW: input [N, H, W, C] -> output [N, C, H, W]"
+  - "All dimensions >= 1"
+
+dtype_rules:
+  - "dtype(y) == dtype(x)"
+  - "dtype(x) in {float32, float16, int32}"
+
+layout_rules:
+  - "Output layout is determined by the transpose mode"
+  - "For 4D conversions, the input layout must match the declared source format"
+  - "2D inputs must be contiguous"
+
+broadcasting: false
+
+masking: false
+
+tiling:
+  description: |
+    For 2D: tile the output matrix. Each tile copies a sub-block
+    from the input with strided access, writing contiguously.
+    For 4D: tile along N and spatial dims, with C as the innermost
+    vectorized copy dimension to optimize memory bandwidth.
+  tile_m: 32
+  tile_n: 32
+
+implementation:
+  language: AscendC
+  style: "tiled data-movement kernel with coalesced writes"
+  strategy: |
+    The kernel tiles the output tensor. For each output tile, it
+    computes the corresponding input coordinates using the inverse
+    permutation and performs coalesced reads (or strided reads with
+    vectorized loads). Writes to output are always contiguous.
+    For small C dimensions in 4D NHWC<->NCHW, use shared memory
+    (UB) as a scratchpad for local transpose of small tiles.
+
+accuracy:
+  int32:
+    comparison: exact
+    abs: 0
+    rel: 0
+  float32:
+    abs: 1.0e-5
+    rel: 1.0e-5
+  float16:
+    abs: 1.0e-2
+    rel: 1.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    2d:
+      - [1, 1]
+      - [3, 7]
+      - [32, 32]
+      - [128, 64]
+      - [257, 129]
+    4d:
+      - [1, 3, 224, 224]
+      - [2, 16, 32, 32]
+      - [4, 7, 13, 17]
+  edge_cases:
+    - "[1, 1]     trivial 2D transpose"
+    - "[32, 32]   square matrix transpose"
+    - "[257, 129] non-power-of-2, odd dimensions"
+    - "C=3        RGB-like channel count in 4D"
+  invalid_cases:
+    - "perm not matching selected mode"
+    - "rank mismatch (e.g., 3D input)"
+    - "negative or zero dimension sizes"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/npu/tests/test_transpose_2d_4d[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/npu/tests/test_transpose_2d_4d[1]_tests.cmake")
+else()
+  add_test(test_transpose_2d_4d_NOT_BUILT test_transpose_2d_4d_NOT_BUILT)
+endif()

@@ -1,0 +1,2 @@
+Device_id,OP Type,Core Type,Count,Total Time(us),Min Time(us),Avg Time(us),Max Time(us),Ratio(%)
+0,_Z22elementwise_add_kernelPhS_S_,AI_VECTOR_CORE,1,13.32,13.32,13.32,13.32,100

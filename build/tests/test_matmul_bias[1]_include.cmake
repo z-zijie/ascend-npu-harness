@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/tests/test_matmul_bias[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/tests/test_matmul_bias[1]_tests.cmake")
+else()
+  add_test(test_matmul_bias_NOT_BUILT test_matmul_bias_NOT_BUILT)
+endif()

@@ -1,0 +1,135 @@
+schema_version: "1.0"
+
+name: axpy_scalar_affine
+category: elementwise
+target_arch: dav-2201
+
+summary: |
+  Affine transformation with scalar coefficients: y = alpha * x + beta.
+  alpha and beta are host-side scalars broadcast to all tensor elements.
+  The output tensor has the same shape and dtype as the input tensor x.
+
+math:
+  definition: |
+    For a tensor x with elements x[i], compute:
+      y[i] = alpha * x[i] + beta
+    where alpha and beta are real scalar constants.
+  equations:
+    - "y = alpha * x + beta"
+  notes:
+    - "alpha and beta are scalars, not tensors"
+    - "alpha = 0, beta = 0 is a valid (zeroing) case"
+    - "alpha = 1, beta = 0 is a copy"
+
+inputs:
+  - name: x
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+    role: "input tensor"
+
+  - name: alpha
+    dtype: [float32, float16]
+    shape: "scalar"
+    layout: "n/a"
+    role: "multiplicative coefficient"
+
+  - name: beta
+    dtype: [float32, float16]
+    shape: "scalar"
+    layout: "n/a"
+    role: "additive bias"
+
+outputs:
+  - name: y
+    dtype: [float32, float16]
+    shape: "$S"
+    layout: contiguous
+
+parameters:
+  - name: alpha
+    type: scalar
+    default: 1.0
+    description: "Multiplicative coefficient broadcast to all elements"
+
+  - name: beta
+    type: scalar
+    default: 0.0
+    description: "Additive bias broadcast to all elements"
+
+shape_symbols:
+  S:
+    description: "Shape of the input/output tensor"
+    examples:
+      - "[1]"
+      - "[17]"
+      - "[1024]"
+      - "[4097]"
+      - "[32, 128]"
+
+shape_rules:
+  - "output_y.shape == input_x.shape"
+
+dtype_rules:
+  - "dtype(alpha) == dtype(x)"
+  - "dtype(beta) == dtype(x)"
+  - "dtype(y) == dtype(x)"
+  - "dtype(x) in {float32, float16}"
+
+layout_rules:
+  - "Tensor x and y must be contiguous in memory"
+
+broadcasting: "scalar"
+
+masking: false
+
+tiling:
+  description: "1D tiling along the flattened element count"
+  tile_size: 1024
+
+implementation:
+  language: AscendC
+  style: "vectorized elementwise with scalar broadcast"
+  strategy: |
+    Each AI Core loads a tile of x, computes alpha * tile + beta using
+    vectorized fmul and fadd, then stores the result.
+
+accuracy:
+  float32:
+    abs: 1.0e-5
+    rel: 1.0e-5
+  float16:
+    abs: 1.0e-2
+    rel: 1.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    - [1]
+    - [17]
+    - [1024]
+    - [4097]
+    - [32, 128]
+  scalar_values:
+    alpha: [0, 1, -1, 0.5, -2.25]
+    beta:  [0, 1, -1, 0.5, -2.25]
+  edge_cases:
+    - "alpha=0, beta=0        output all zeros"
+    - "alpha=0, beta=5        constant output"
+    - "alpha=1, beta=0        identity"
+    - "shape [1]              single element"
+    - "shape [4097]           non-power-of-2, large 1D"
+  invalid_cases:
+    - "dtype mismatch between x and scalars"
+    - "alpha is NaN or Inf"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

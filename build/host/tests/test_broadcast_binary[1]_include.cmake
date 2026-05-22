@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/host/tests/test_broadcast_binary[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/host/tests/test_broadcast_binary[1]_tests.cmake")
+else()
+  add_test(test_broadcast_binary_NOT_BUILT test_broadcast_binary_NOT_BUILT)
+endif()

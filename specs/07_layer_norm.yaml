@@ -1,0 +1,171 @@
+schema_version: "1.0"
+
+name: layer_norm
+category: normalization
+target_arch: dav-2201
+
+summary: |
+  Layer Normalization over the last dimension.
+  For input x of shape [M, K] (or [B, S, H]), normalize each row (or each
+  [S, H] slice) independently using per-row mean and variance, then apply
+  learnable affine parameters gamma and beta (both of shape [K] or [H]).
+
+math:
+  definition: |
+    For each row (indexed by ...):
+      mean     = (1/K) * sum_j x[..., j]
+      var      = (1/K) * sum_j (x[..., j] - mean)^2
+      x_hat    = (x[..., j] - mean) / sqrt(var + eps)
+      y[..., j] = x_hat * gamma[j] + beta[j]
+  equations:
+    - "mean = reduce_mean(x, axis=-1)"
+    - "var = reduce_mean((x - mean)^2, axis=-1)"
+    - "y = (x - mean) / sqrt(var + eps) * gamma + beta"
+  notes:
+    - "eps is a small positive constant to avoid division by zero"
+    - "gamma and beta are trainable parameters of shape [K] (2D) or [H] (3D)"
+    - "Normalization is over the last dimension"
+    - "mean and var are computed in float32 regardless of input dtype for stability"
+
+inputs:
+  - name: x
+    dtype: [float32, float16]
+    shape: "2D: [M, K]; 3D: [B, S, H]"
+    layout: contiguous
+    role: "input tensor to normalize"
+
+  - name: gamma
+    dtype: [float32, float16]
+    shape: "2D: [K]; 3D: [H]"
+    layout: contiguous
+    role: "learnable scale parameter"
+
+  - name: beta
+    dtype: [float32, float16]
+    shape: "2D: [K]; 3D: [H]"
+    layout: contiguous
+    role: "learnable shift parameter"
+
+outputs:
+  - name: y
+    dtype: [float32, float16]
+    shape: "same as x: 2D [M, K] or 3D [B, S, H]"
+    layout: contiguous
+
+parameters:
+  - name: eps
+    type: float
+    default: 1.0e-5
+    description: "Small constant for numerical stability in division by sqrt(var)"
+
+  - name: normalized_shape
+    type: "list[int]"
+    description: "Shape of the normalized dimensions (last dims of input)"
+
+shape_symbols:
+  M:
+    description: "Number of rows in 2D input"
+    values: [1, 3, 64, 257]
+  K:
+    description: "Normalization dimension in 2D input"
+    values: [16, 64, 128, 768, 1024, 4096]
+  B:
+    description: "Batch size in 3D input"
+    values: [1, 2, 4]
+  S:
+    description: "Sequence length in 3D input"
+    values: [1, 16, 128]
+  H:
+    description: "Hidden dimension in 3D input"
+    values: [16, 64, 128, 768, 1024, 4096]
+
+shape_rules:
+  - "2D: x.shape == [M, K], gamma.shape == [K], beta.shape == [K]"
+  - "3D: x.shape == [B, S, H], gamma.shape == [H], beta.shape == [H]"
+  - "y.shape == x.shape"
+
+dtype_rules:
+  - "dtype(gamma) == dtype(x)"
+  - "dtype(beta) == dtype(x)"
+  - "dtype(y) == dtype(x)"
+  - "dtype(x) in {float32, float16}"
+  - "Internal statistics (mean, var) computed in float32"
+
+layout_rules:
+  - "All tensor inputs and outputs must be contiguous"
+  - "gamma and beta are 1D vectors"
+
+broadcasting: true
+broadcast_rules:
+  - "gamma: [K] broadcast to [M, K] along M"
+  - "beta:  [K] broadcast to [M, K] along M"
+  - "gamma: [H] broadcast to [B, S, H] along B and S"
+  - "beta:  [H] broadcast to [B, S, H] along B and S"
+
+masking: false
+
+tiling:
+  description: |
+    Tile along M (or B*S) dimension. Each AI Core processes one or more
+    rows. Within each row, use a two-pass algorithm:
+    - Pass 1: compute mean and variance (reduce over K/H with float32 accum)
+    - Pass 2: normalize and affine transform
+  tile_m: 32
+  reduction_style: "two-pass per-row with float32 accumulator"
+
+implementation:
+  language: AscendC
+  style: "tiled two-pass normalization kernel"
+  strategy: |
+    Distribute rows across AI Cores. Each core processes one or more rows.
+    For each row:
+      Pass 1: Load vector, compute mean via reduce_sum/K in float32.
+              Compute variance via (x-mean)^2 reduce_sum/K in float32.
+      Pass 2: Load vector again, normalize: (x-mean) * rsqrt(var+eps).
+              Multiply by gamma and add beta elementwise.
+              Store result.
+    Fusing both passes in a single kernel avoids intermediate memory traffic.
+
+accuracy:
+  float32:
+    abs: 1.0e-4
+    rel: 1.0e-4
+  float16:
+    abs: 5.0e-2
+    rel: 5.0e-2
+
+performance:
+  required: false
+  benchmark: sanity
+
+tests:
+  deterministic_seed: 20260522
+  shapes:
+    2d:
+      - {M: 1, K: 16}
+      - {M: 3, K: 128}
+      - {M: 64, K: 768}
+      - {M: 257, K: 1024}
+      - {M: 1, K: 4096}
+    3d:
+      - {B: 1, S: 1, H: 64}
+      - {B: 2, S: 16, H: 128}
+      - {B: 4, S: 128, H: 768}
+  edge_cases:
+    - "K=16               small normalization dim"
+    - "M=1                single row"
+    - "K=4096             large normalization dim"
+    - "S=1, H large       single-token 3D case"
+    - "eps=1e-5 default, eps=1e-3 large eps"
+  invalid_cases:
+    - "gamma.shape != [K]  shape mismatch with normalized dim"
+    - "beta.shape != [K]   shape mismatch with normalized dim"
+    - "eps <= 0            non-positive epsilon"
+    - "dtype mismatch between x and gamma"
+
+benchmark:
+  required: false
+  warmup: 10
+  iterations: 100
+
+status: draft

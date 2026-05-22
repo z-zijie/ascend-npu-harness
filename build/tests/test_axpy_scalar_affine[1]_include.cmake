@@ -1,0 +1,5 @@
+if(EXISTS "/home/developer/workspace/harness/build/tests/test_axpy_scalar_affine[1]_tests.cmake")
+  include("/home/developer/workspace/harness/build/tests/test_axpy_scalar_affine[1]_tests.cmake")
+else()
+  add_test(test_axpy_scalar_affine_NOT_BUILT test_axpy_scalar_affine_NOT_BUILT)
+endif()

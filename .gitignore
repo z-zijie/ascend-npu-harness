@@ -1,0 +1,40 @@
+# Build outputs
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CTestTestfile.cmake
+Testing/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Ninja and compiler artifacts
+.ninja_deps
+.ninja_log
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Generated profiling and run artifacts
+*.asc
+*_prof
+prof_data/
+mindstudio_profiler_output/
+mindstudio_profiler_log/
+
+# Harness runtime state
+.npu-harness/runs/
+.npu-harness/operators/
+.npu-harness/state/
+
+# Logs and local caches
+*.log
+*.tmp
+*.bak
+.cache/
+__pycache__/
+*.py[cod]

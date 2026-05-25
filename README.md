@@ -37,6 +37,20 @@ intake -> spec -> discuss -> plan -> generate -> implement -> build -> test -> b
 python3 scripts/harness.py status
 ```
 
+## Exporting a CANN-Bench Project
+
+```bash
+python3 scripts/harness.py export-cannbench \
+  --task-dir ../cann-bench/tasks/level1/exp \
+  --out-dir ../generated/cannbench/exp \
+  --force
+```
+
+The initial exporter supports `Exp` and emits a CANN-Bench direct launch
+source-dir project with `build.sh`, package `cann_bench`, Ascend C kernel
+sources, torch-npu plugin sources, and wheel packaging. It is intended as the
+bridge from harness generation to CANN-Bench `--source-dir` evaluation.
+
 ## Adding a New Operator
 
 ```bash

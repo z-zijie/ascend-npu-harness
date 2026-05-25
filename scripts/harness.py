@@ -15,6 +15,7 @@ Usage:
   python3 scripts/harness.py bench <op_name>
   python3 scripts/harness.py verify <op_name>
   python3 scripts/harness.py verify-performance <op_name>
+  python3 scripts/harness.py export-cannbench --task-dir <task_dir> --out-dir <out_dir> [--force]
   python3 scripts/harness.py ship <op_name>
 """
 
@@ -24,9 +25,13 @@ import os
 import subprocess
 import sys
 import time
-import yaml
 from datetime import datetime
 from pathlib import Path
+
+try:
+    import yaml
+except ModuleNotFoundError:
+    yaml = None
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -71,11 +76,15 @@ def save_json(path, data):
 
 
 def load_yaml(path):
+    if yaml is None:
+        raise RuntimeError("PyYAML is required for this harness command")
     with open(path, 'r') as f:
         return yaml.safe_load(f)
 
 
 def save_yaml(path, data):
+    if yaml is None:
+        raise RuntimeError("PyYAML is required for this harness command")
     with open(path, 'w') as f:
         yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
@@ -482,6 +491,27 @@ def cmd_ship(args):
     return 0 if all(checks.values()) else 1
 
 
+def cmd_export_cannbench(args):
+    """Generate a CANN-Bench source-dir project from official task files."""
+    script = PROJECT_ROOT / "scripts" / "export_cannbench.py"
+    task_dir = Path(args.task_dir).resolve()
+    out_dir = Path(args.out_dir).resolve()
+    cmd = [
+        sys.executable,
+        str(script),
+        "--task-dir",
+        str(task_dir),
+        "--out-dir",
+        str(out_dir),
+    ]
+    if args.force:
+        cmd.append("--force")
+    print("=== NPU Harness: export-cannbench ===")
+    print("  RUN:", " ".join(cmd))
+    result = subprocess.run(cmd, cwd=PROJECT_ROOT.parent)
+    return result.returncode
+
+
 def main():
     parser = argparse.ArgumentParser(description="NPU Operator Development Harness CLI")
     sub = parser.add_subparsers(dest="command")
@@ -516,6 +546,11 @@ def main():
     p_vperf = sub.add_parser("verify-performance", help="Verify performance")
     p_vperf.add_argument("op_name", help="Operator name")
 
+    p_export = sub.add_parser("export-cannbench", help="Export CANN-Bench source-dir project")
+    p_export.add_argument("--task-dir", required=True, help="CANN-Bench task directory")
+    p_export.add_argument("--out-dir", required=True, help="Generated source-dir output path")
+    p_export.add_argument("--force", action="store_true", help="Replace output dir if it exists")
+
     p_ship = sub.add_parser("ship", help="Finalize operator")
     p_ship.add_argument("op_name", help="Operator name")
 
@@ -546,6 +581,8 @@ def main():
         return cmd_verify(args)
     elif args.command == "verify-performance":
         return cmd_verify_performance(args)
+    elif args.command == "export-cannbench":
+        return cmd_export_cannbench(args)
     elif args.command == "ship":
         return cmd_ship(args)
     else:
